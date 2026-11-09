@@ -145,7 +145,7 @@ function resolveRef(ref: string, ctx: ConversionContext): JSONSchema.JSONSchema 
 
   if (path[0] === defsKey) {
     const key = path[1] === undefined ? undefined : decodeJSONPointerSegment(path[1]);
-    if (!key || !ctx.defs[key]) {
+    if (!key || ctx.defs[key] === undefined) {
       throw new Error(`Reference not found: ${ref}`);
     }
     return ctx.defs[key]!;

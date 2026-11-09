@@ -1465,3 +1465,24 @@ test("a carried subschema that references $defs is dropped rather than emitted d
   });
   expect(z.toJSONSchema(nested)).not.toHaveProperty("contains");
 });
+
+test("$ref to a boolean definition", () => {
+  for (const [key, schema] of [
+    ["$defs", "https://json-schema.org/draft/2020-12/schema"],
+    ["definitions", "http://json-schema.org/draft-07/schema#"],
+  ] as const) {
+    const ref = `#/${key}/Def`;
+    const never = fromJSONSchema({ $schema: schema, [key]: { Def: false }, $ref: ref });
+    expect(never.safeParse("a").success).toBe(false);
+    const prop = fromJSONSchema({
+      $schema: schema,
+      [key]: { Def: false },
+      type: "object",
+      properties: { a: { $ref: ref } },
+    });
+    expect(prop.safeParse({ a: 1 }).success).toBe(false);
+    expect(prop.safeParse({}).success).toBe(true);
+    expect(fromJSONSchema({ $schema: schema, [key]: { Def: true }, $ref: ref }).safeParse("a").success).toBe(true);
+    expect(() => fromJSONSchema({ $schema: schema, [key]: {}, $ref: ref })).toThrow("Reference not found");
+  }
+});
