@@ -101,6 +101,8 @@ export interface Seen {
   /** Cycle path */
   cycle?: (string | number)[] | undefined;
   isParent?: boolean | undefined;
+  /** The schema supplied its own JSON Schema, so it inherits nothing from its parent. */
+  custom?: boolean | undefined;
   /** Schema to inherit JSON Schema properties from (set by processor for wrappers) */
   ref?: schemas.$ZodType | null;
   /** JSON Schema property path for this schema */
@@ -242,8 +244,7 @@ export function processSchema<T extends schemas.$ZodType>(
   const overrideSchema = schema._zod.toJSONSchema?.();
   if (overrideSchema) {
     result.schema = overrideSchema as any;
-    // an override inherits nothing from its parent
-    result.ref = null;
+    result.custom = true;
   } else {
     const params = {
       ..._params,
@@ -629,7 +630,7 @@ export function finalize<T extends schemas.$ZodType>(
 
     // If parent was extracted (has $ref), propagate $ref to this schema. This handles cases like: readonly().meta({id}).describe() where processor sets ref to innerType but parent should be referenced
     const parent = zodSchema._zod.parent;
-    if (parent && parent !== ref) {
+    if (parent && parent !== ref && !seen.custom) {
       // Ensure parent is processed first so its def has inherited properties
       flattenRef(parent);
       const parentSeen = ctx.seen.get(parent);

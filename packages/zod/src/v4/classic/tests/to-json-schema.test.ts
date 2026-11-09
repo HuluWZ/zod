@@ -4069,6 +4069,16 @@ test("custom toJSONSchema on a refined schema", () => {
   ]) {
     expect(z.toJSONSchema(z.object(shape)).properties!.child).toEqual({ type: "integer", title: "override" });
   }
+
+  let calls = 0;
+  const final = z.toJSONSchema(refined, {
+    override: ({ jsonSchema }) => {
+      calls++;
+      jsonSchema.description = "final override";
+    },
+  });
+  expect(calls).toBe(1);
+  expect(final.description).toBe("final override");
 });
 
 test("cycle detection - root", () => {
