@@ -242,6 +242,8 @@ export function processSchema<T extends schemas.$ZodType>(
   const overrideSchema = schema._zod.toJSONSchema?.();
   if (overrideSchema) {
     result.schema = overrideSchema as any;
+    // an override inherits nothing from its parent
+    result.ref = null;
   } else {
     const params = {
       ..._params,

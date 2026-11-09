@@ -4049,6 +4049,28 @@ test("custom toJSONSchema", () => {
   `);
 });
 
+test("custom toJSONSchema on a refined schema", () => {
+  const override = () => ({ type: "integer", title: "override" }) as const;
+
+  const refined = z.string().min(1);
+  refined._zod.toJSONSchema = override;
+  expect(z.toJSONSchema(refined, { target: "draft-2020-12" })).toEqual({
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    type: "integer",
+    title: "override",
+  });
+
+  const parent = z.string().meta({ id: "Parent" });
+  const child = parent.min(1);
+  child._zod.toJSONSchema = override;
+  for (const shape of [
+    { parent, child },
+    { child, parent },
+  ]) {
+    expect(z.toJSONSchema(z.object(shape)).properties!.child).toEqual({ type: "integer", title: "override" });
+  }
+});
+
 test("cycle detection - root", () => {
   const schema = z.object({
     name: z.string(),
