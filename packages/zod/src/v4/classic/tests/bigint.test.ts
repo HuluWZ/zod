@@ -87,3 +87,11 @@ test("multipleOf(0n) does not throw from safeParse", () => {
   expect(obj.safeParse({ a: BigInt(1), b: BigInt(2) }).success).toBe(false);
   expect(obj.safeParse({ a: BigInt(1), b: 2 }).success).toBe(false);
 });
+
+test("not_multiple_of divisor keeps the schema's own type", () => {
+  const big = z.bigint().multipleOf(BigInt(5)).safeParse(BigInt(7)).error!.issues[0];
+  const num = z.number().multipleOf(5).safeParse(7).error!.issues[0];
+  expect(big).toMatchObject({ code: "not_multiple_of", divisor: BigInt(5) });
+  expect(num).toMatchObject({ code: "not_multiple_of", divisor: 5 });
+  if (big.code === "not_multiple_of") expectTypeOf(big.divisor).toEqualTypeOf<number | bigint>();
+});

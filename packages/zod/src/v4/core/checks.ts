@@ -176,7 +176,7 @@ export const $ZodCheckMultipleOf: core.$constructor<$ZodCheckMultipleOf<number |
       payload.issues.push({
         origin: typeof payload.value as "number",
         code: "not_multiple_of",
-        divisor: def.value as number,
+        divisor: def.value,
         input: payload.value,
         inst,
         continue: !def.abort,

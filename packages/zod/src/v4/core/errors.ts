@@ -76,7 +76,7 @@ export interface $ZodIssueInvalidStringFormat extends $ZodIssueBase {
 
 export interface $ZodIssueNotMultipleOf<Input extends number | bigint = number | bigint> extends $ZodIssueBase {
   readonly code: "not_multiple_of";
-  readonly divisor: number;
+  readonly divisor: Input;
   readonly input?: Input;
 }
 
